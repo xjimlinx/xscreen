@@ -1,3 +1,4 @@
+const extensionApi = globalThis.browser ?? globalThis.chrome;
 const MAX_CANDIDATES_PER_TAB = 100;
 const MEDIA_URL_PATTERN = /\.(m3u8|mpd|mp4|m4v|webm|mkv|mov|mp3|m4a|aac|flac|m4s|ts)(?:$|[?#])/i;
 const MANIFEST_URL_PATTERN = /\.(m3u8|mpd)(?:$|[?#])/i;
@@ -44,24 +45,24 @@ function classify(url, contentType = "", requestType = "") {
 
 async function readCandidates(tabId) {
   const key = storageKey(tabId);
-  const stored = await chrome.storage.session.get(key);
+  const stored = await extensionApi.storage.session.get(key);
   return Array.isArray(stored[key]) ? stored[key] : [];
 }
 
 async function writeCandidates(tabId, candidates) {
   const key = storageKey(tabId);
-  await chrome.storage.session.set({ [key]: candidates.slice(0, MAX_CANDIDATES_PER_TAB) });
+  await extensionApi.storage.session.set({ [key]: candidates.slice(0, MAX_CANDIDATES_PER_TAB) });
   const visibleCount = candidates.filter((candidate) => candidate.kind !== "segment").length;
-  await chrome.action.setBadgeBackgroundColor({ tabId, color: "#2563eb" }).catch(() => {});
-  await chrome.action.setBadgeText({
+  await extensionApi.action.setBadgeBackgroundColor({ tabId, color: "#2563eb" }).catch(() => {});
+  await extensionApi.action.setBadgeText({
     tabId,
     text: visibleCount > 0 ? String(Math.min(visibleCount, 99)) : ""
   }).catch(() => {});
 }
 
 async function clearCandidates(tabId) {
-  await chrome.storage.session.remove(storageKey(tabId));
-  await chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {});
+  await extensionApi.storage.session.remove(storageKey(tabId));
+  await extensionApi.action.setBadgeText({ tabId, text: "" }).catch(() => {});
 }
 
 async function recordCandidate(details, contentType = "", contentLength = "") {
@@ -99,7 +100,7 @@ async function recordCandidate(details, contentType = "", contentLength = "") {
   await writeCandidates(details.tabId, candidates);
 }
 
-chrome.webRequest.onBeforeRequest.addListener(
+extensionApi.webRequest.onBeforeRequest.addListener(
   (details) => {
     if (details.type === "main_frame") {
       void enqueue(details.tabId, () => clearCandidates(details.tabId));
@@ -112,7 +113,7 @@ chrome.webRequest.onBeforeRequest.addListener(
   { urls: ["<all_urls>"] }
 );
 
-chrome.webRequest.onHeadersReceived.addListener(
+extensionApi.webRequest.onHeadersReceived.addListener(
   (details) => {
     const contentType = responseHeader(details.responseHeaders, "content-type");
     const contentLength = responseHeader(details.responseHeaders, "content-length");
@@ -124,11 +125,11 @@ chrome.webRequest.onHeadersReceived.addListener(
   ["responseHeaders"]
 );
 
-chrome.tabs.onRemoved.addListener((tabId) => {
-  void enqueue(tabId, () => chrome.storage.session.remove(storageKey(tabId)));
+extensionApi.tabs.onRemoved.addListener((tabId) => {
+  void enqueue(tabId, () => extensionApi.storage.session.remove(storageKey(tabId)));
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+extensionApi.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "get-candidates" && Number.isInteger(message.tabId)) {
     readCandidates(message.tabId)
       .then((candidates) => sendResponse({ ok: true, candidates }))

@@ -270,9 +270,9 @@ sudo pacman -S noto-fonts-cjk
 
 本地文件的实时传输量和平均速率会显示在音量条右侧；网络 URL 由电视直接读取，因此不显示传输统计。
 
-## 11. Chrome 媒体探测扩展
+## 11. Chrome / Firefox 媒体探测扩展
 
-扩展源码位于项目的 `extension` 目录，是标准 Chrome Manifest V3 扩展。
+扩展源码位于项目的 `extension` 目录，是 Chrome 和 Firefox 共用的 Manifest V3 扩展。支持 Chrome 121+、Firefox 142+。
 
 先启动本机桥接服务：
 
@@ -287,7 +287,7 @@ xscreen browser bridge: http://127.0.0.1:47821
 pairing token: 0123456789abcdef...
 ```
 
-安装扩展：
+在 Chrome 中安装：
 
 1. 打开 `chrome://extensions`。
 2. 开启“开发者模式”。
@@ -299,7 +299,18 @@ pairing token: 0123456789abcdef...
 8. 优先选择标记为 `manifest` 或 `media` 的候选地址。
 9. 选择电视并点击“投送到电视”。
 
-扩展只负责观察媒体请求和提供界面。电视发现、DLNA 控制和投送仍由本机 `xscreen` 完成。
+已安装旧版 Chrome 扩展时，请在 `chrome://extensions` 点击“重新加载”，使新清单生效。
+
+在 Firefox 中临时安装：
+
+1. 打开 `about:debugging`，进入“此 Firefox”（This Firefox）。
+2. 点击“临时载入附加组件”（Load Temporary Add-on），选择项目中的 `extension/manifest.json`。
+3. 点击扩展图标，粘贴 bridge 输出的配对令牌。
+4. 打开网页并播放视频，从候选地址中选择媒体投送。
+
+Firefox 重启后临时扩展会被移除；长期安装需要 Mozilla 签名的 XPI，目前尚未发布签名版。
+
+扩展只负责观察媒体请求和提供界面。电视发现、DLNA 控制和投送仍由本机 `xscreen` 完成。它需要访问网页请求以识别来自第三方 CDN 的媒体；只有用户点击投送时，选中的媒体 URL 才会发送到本机 bridge。
 
 桥接服务只监听 `127.0.0.1`，外部设备无法直接连接。每次启动默认生成新的随机令牌；需要固定令牌时：
 

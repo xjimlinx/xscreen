@@ -86,9 +86,9 @@ target/release/xscreen-gui
 
 在界面中粘贴令牌，依次点击“扫描电视”、选择文件或填写媒体 URL、“投送到电视”。投送后可拖动进度条、播放/暂停/停止、调整音量和尝试倍速播放。本地文件投送期间必须保持 bridge 运行；倍速、跳转和音量是否可用取决于电视的 DLNA 实现。
 
-## 浏览器媒体探测扩展
+## 浏览器媒体探测扩展（Chrome / Firefox）
 
-项目附带一个标准 Chromium/Chrome Manifest V3 扩展，位于 [`extension/`](extension/)。它会观察当前标签页正常产生的网络请求，自动识别 MP4、HLS、DASH 和媒体分片。扩展只负责媒体探测和界面，设备发现及 DLNA 投送仍由本机的 Rust `xscreen` 完成。
+项目附带一个 Chrome 和 Firefox 共用的 Manifest V3 扩展，位于 [`extension/`](extension/)。它会观察当前标签页正常产生的网络请求，自动识别 MP4、HLS、DASH 和媒体分片。扩展只负责媒体探测和界面，设备发现及 DLNA 投送仍由本机的 Rust `xscreen` 完成。支持 Chrome 121+、Firefox 142+。
 
 先启动本机桥接服务：
 
@@ -102,7 +102,7 @@ target/release/xscreen bridge
 target/release/xscreen bridge --token '请换成自己的长随机字符串'
 ```
 
-安装方法：
+Chrome 安装方法：
 
 1. 在 Chromium/Chrome 打开 `chrome://extensions`。
 2. 开启“开发者模式”。
@@ -112,7 +112,18 @@ target/release/xscreen bridge --token '请换成自己的长随机字符串'
 6. 点击工具栏中的 xscreen 扩展图标，优先选择标记为 `manifest` 或 `media` 的地址。
 7. 选择电视后点击“投送到电视”。也可以只复制 URL 或终端命令。
 
-扩展需要读取所有站点的请求 URL，原因是媒体常由第三方 CDN 提供。候选地址只保存在浏览器会话存储中；扩展不会读取或保存 Cookie、Authorization 等登录凭据，也不会解密 DRM 内容。配对令牌保存在扩展自己的本地存储中。只有电视能够直接访问且支持解码的媒体地址才能通过 DLNA 播放，带临时签名的地址可能很快失效。
+如果此前已加载过 Chrome 版，更新代码后到 `chrome://extensions` 点击该扩展的“重新加载”。
+
+Firefox 临时安装方法：
+
+1. 打开 `about:debugging`，选择“此 Firefox”（This Firefox）。
+2. 点击“临时载入附加组件”（Load Temporary Add-on），选择项目的 `extension/manifest.json`。
+3. 启动 `xscreen bridge`，把它输出的配对令牌粘贴到扩展弹窗中。
+4. 打开视频网页并开始播放，再从扩展候选列表投送。
+
+Firefox 的临时安装会在浏览器重启后失效；要长期安装，需要经 Mozilla 签名的 XPI。本项目目前提供开发安装用的源码，尚未发布签名版。
+
+扩展需要读取所有站点的请求 URL，原因是媒体常由第三方 CDN 提供。候选地址只保存在浏览器会话存储中；只有用户点击“投送到电视”时，所选媒体 URL 才会发送到本机 `xscreen bridge`。扩展不会读取或保存 Cookie、Authorization 等登录凭据，也不会解密 DRM 内容。配对令牌保存在扩展自己的本地存储中。只有电视能够直接访问且支持解码的媒体地址才能通过 DLNA 播放，带临时签名的地址可能很快失效。
 
 连接后可用命令：
 

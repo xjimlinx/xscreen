@@ -1,3 +1,4 @@
+const extensionApi = globalThis.browser ?? globalThis.chrome;
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const deviceInput = document.querySelector("#device");
@@ -149,7 +150,7 @@ function render() {
 }
 
 async function refresh() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await extensionApi.tabs.query({ active: true, currentWindow: true });
   activeTabId = tab?.id ?? null;
   if (activeTabId === null) {
     candidates = [];
@@ -157,7 +158,7 @@ async function refresh() {
     status.textContent = "没有活动标签页";
     return;
   }
-  const response = await chrome.runtime.sendMessage({ type: "get-candidates", tabId: activeTabId });
+  const response = await extensionApi.runtime.sendMessage({ type: "get-candidates", tabId: activeTabId });
   candidates = response?.ok && Array.isArray(response.candidates) ? response.candidates : [];
   render();
 }
@@ -169,24 +170,24 @@ document.querySelector("#refresh").addEventListener("click", () => {
 });
 document.querySelector("#clear").addEventListener("click", async () => {
   if (activeTabId !== null) {
-    await chrome.runtime.sendMessage({ type: "clear-candidates", tabId: activeTabId });
+    await extensionApi.runtime.sendMessage({ type: "clear-candidates", tabId: activeTabId });
   }
   candidates = [];
   render();
 });
 showSegmentsInput.addEventListener("change", render);
 deviceInput.addEventListener("change", () => {
-  void chrome.storage.local.set({ device: deviceInput.value.trim() });
+  void extensionApi.storage.local.set({ device: deviceInput.value.trim() });
 });
 tokenInput.addEventListener("change", () => {
-  void chrome.storage.local.set({ bridgeToken: tokenInput.value.trim() });
+  void extensionApi.storage.local.set({ bridgeToken: tokenInput.value.trim() });
   void refreshDevices().catch((error) => {
     status.textContent = error.message;
   });
 });
 
 async function initialize() {
-  const { device, bridgeToken } = await chrome.storage.local.get(["device", "bridgeToken"]);
+  const { device, bridgeToken } = await extensionApi.storage.local.get(["device", "bridgeToken"]);
   if (typeof device === "string" && device) {
     deviceInput.value = device;
   }
