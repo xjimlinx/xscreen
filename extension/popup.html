@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>xscreen Media Detector</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>xscreen</h1>
+        <p>媒体地址探测器</p>
+      </div>
+      <button id="refresh" class="icon-button" title="刷新">↻</button>
+    </header>
+
+    <section class="controls">
+      <label>
+        投屏设备
+        <input id="device" value="1" placeholder="名称、IP 或编号" list="device-options">
+        <datalist id="device-options"></datalist>
+      </label>
+      <label>
+        xscreen 配对令牌
+        <input id="token" type="password" placeholder="运行 xscreen bridge 后粘贴" autocomplete="off">
+      </label>
+      <label class="checkbox">
+        <input id="show-segments" type="checkbox">
+        显示媒体分片
+      </label>
+    </section>
+
+    <main id="results">
+      <div class="empty">请播放网页视频，检测到的媒体会显示在这里。</div>
+    </main>
+
+    <footer>
+      <span id="status">等待媒体请求</span>
+      <button id="clear" class="text-button">清空</button>
+    </footer>
+
+    <template id="candidate-template">
+      <article class="candidate">
+        <div class="candidate-head">
+          <span class="kind"></span>
+          <span class="mime"></span>
+        </div>
+        <div class="url"></div>
+        <div class="meta"></div>
+        <div class="actions">
+          <button class="copy-url">复制 URL</button>
+          <button class="copy-command">复制命令</button>
+          <button class="cast primary">投送到电视</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

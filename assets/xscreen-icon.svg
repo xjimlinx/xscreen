@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="xscreen 投屏图标">
+  <rect x="4" y="4" width="120" height="120" rx="27" fill="#172736"/>
+  <g fill="none" stroke="#24d6c6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M37 52V41c0-5 4-9 9-9h48c5 0 9 4 9 9v41c0 5-4 9-9 9H66" stroke-width="8"/>
+    <path d="M77 94v9M63 104h29" stroke-width="7"/>
+    <path d="M28 72c10 0 18 8 18 18M28 56c19 0 34 15 34 34" stroke-width="8"/>
+  </g>
+  <circle cx="28" cy="90" r="6" fill="#24d6c6"/>
+</svg>

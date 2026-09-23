@@ -1,0 +1,40 @@
+[package]
+name = "xscreen"
+version = "0.1.0"
+edition = "2024"
+description = "Cast local media to DLNA/UPnP televisions"
+license = "MIT"
+
+[features]
+default = []
+gui = ["dep:eframe", "dep:image", "dep:rfd", "reqwest/blocking"]
+
+[dependencies]
+anyhow = "1.0"
+axum = "0.8"
+clap = { version = "4.5", features = ["derive"] }
+eframe = { version = "0.33", optional = true, default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+image = { version = "0.25", optional = true, default-features = false, features = ["jpeg", "png"] }
+mime_guess = "2.0"
+quick-xml = { version = "0.38", features = ["serialize"] }
+reqwest = { version = "0.12", default-features = false, features = ["charset", "http2", "json", "rustls-tls-native-roots"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rfd = { version = "0.15", optional = true }
+tokio = { version = "1.47", features = ["fs", "io-std", "io-util", "macros", "net", "rt-multi-thread", "signal", "time"] }
+tokio-util = { version = "0.7", features = ["io"] }
+tower-http = { version = "0.6", features = ["cors"] }
+url = "2.5"
+uuid = { version = "1.18", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3.21"
+
+[profile.release]
+lto = "thin"
+strip = true
+
+[[bin]]
+name = "xscreen-gui"
+path = "src/bin/xscreen-gui.rs"
+required-features = ["gui"]

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "xscreen Media Detector",
+  "version": "0.1.0",
+  "minimum_chrome_version": "102",
+  "description": "Detect media URLs on the current page and generate xscreen cast commands.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "xscreen Media Detector",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=xscreen 投屏控制台
+Comment=使用 DLNA 投送视频并控制电视播放
+Exec=xscreen-gui
+Icon=xscreen
+Terminal=false
+Categories=AudioVideo;
+Keywords=DLNA;UPnP;电视;投屏;
