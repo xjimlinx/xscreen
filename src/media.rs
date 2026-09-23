@@ -25,6 +25,24 @@ use tokio_util::io::ReaderStream;
 use url::Url;
 use uuid::Uuid;
 
+/// Infer the MIME type sent to a renderer for a remote media URL.
+pub fn mime_for_remote_url(url: &Url) -> String {
+    // mime_guess maps .m3u8 to audio/x-mpegurl, which incorrectly makes
+    // video HLS playlists appear as audio items in DLNA metadata.
+    if Path::new(url.path())
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("m3u8"))
+    {
+        return "application/vnd.apple.mpegurl".to_owned();
+    }
+
+    mime_guess::from_path(url.path())
+        .first()
+        .map(|mime| mime.essence_str().to_owned())
+        .unwrap_or_else(|| "video/mp4".to_owned())
+}
+
 #[derive(Debug, Clone)]
 struct MediaState {
     file: PathBuf,
@@ -368,6 +386,19 @@ fn route_local_ip(device_location: &Url) -> Result<IpAddr> {
 mod tests {
     use super::*;
     use reqwest::header::RANGE;
+
+    #[test]
+    fn remote_hls_urls_use_playlist_mime_instead_of_audio_mime() {
+        for source in [
+            "https://example.com/master.m3u8",
+            "https://example.com/VIDEO.M3U8?token=abc",
+        ] {
+            let url = Url::parse(source).unwrap();
+            assert_eq!(mime_for_remote_url(&url), "application/vnd.apple.mpegurl");
+        }
+        let audio = Url::parse("https://example.com/music.mp3").unwrap();
+        assert_eq!(mime_for_remote_url(&audio), "audio/mpeg");
+    }
 
     #[test]
     fn parses_http_byte_ranges() {

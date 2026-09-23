@@ -11,7 +11,7 @@ use uuid::Uuid;
 use xscreen::bridge::serve_bridge;
 use xscreen::device::Device;
 use xscreen::discovery::discover_devices;
-use xscreen::media::{MediaServer, TransferStats};
+use xscreen::media::{MediaServer, TransferStats, mime_for_remote_url};
 use xscreen::soap::{DlnaClient, escape_xml};
 
 #[derive(Debug, Parser)]
@@ -219,10 +219,7 @@ async fn cast(
         if !matches!(url.scheme(), "http" | "https") {
             bail!("only local files and HTTP(S) URLs are supported");
         }
-        let mime = mime_guess::from_path(url.path())
-            .first()
-            .map(|mime| mime.essence_str().to_owned())
-            .unwrap_or_else(|| "video/mp4".to_owned());
+        let mime = mime_for_remote_url(&url);
         let title = url
             .path_segments()
             .and_then(|mut parts| parts.next_back())

@@ -18,7 +18,7 @@ use url::Url;
 
 use crate::device::Device;
 use crate::discovery::discover_devices;
-use crate::media::{MediaServer, TransferStats};
+use crate::media::{MediaServer, TransferStats, mime_for_remote_url};
 use crate::soap::{DlnaClient, escape_xml};
 
 #[derive(Clone)]
@@ -228,10 +228,7 @@ async fn cast(
                 "only local files and HTTP(S) media URLs are supported",
             ));
         }
-        let mime = mime_guess::from_path(url.path())
-            .first()
-            .map(|mime| mime.essence_str().to_owned())
-            .unwrap_or_else(|| "video/mp4".to_owned());
+        let mime = mime_for_remote_url(&url);
         let title = url
             .path_segments()
             .and_then(|mut segments| segments.next_back())
@@ -454,6 +451,15 @@ mod tests {
         let metadata = didl_metadata("https://host/a.m3u8?x=1&y=2", "video/mp4", "A < B");
         assert!(metadata.contains("x=1&amp;y=2"));
         assert!(metadata.contains("A &lt; B"));
+    }
+
+    #[test]
+    fn hls_playlist_is_described_as_video() {
+        let url = Url::parse("https://host/video.m3u8?token=abc").unwrap();
+        let metadata = didl_metadata(url.as_str(), &mime_for_remote_url(&url), "Video");
+        assert!(metadata.contains("object.item.videoItem"));
+        assert!(metadata.contains("http-get:*:application/vnd.apple.mpegurl:*"));
+        assert!(!metadata.contains("audioItem"));
     }
 
     #[test]
